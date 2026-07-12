@@ -1,0 +1,109 @@
+specification: API Commons Plans
+specificationVersion: '0.1'
+schema: https://raw.githubusercontent.com/api-evangelist/interface-research/main/schema/api-commons.yml#/$defs/Plans
+provider: Swapcard
+providerId: swapcard
+created: '2026-07-12'
+modified: '2026-07-12'
+reconciled: false
+tags:
+- Events
+- Event Platform
+- SaaS
+- Networking
+- Plans
+description: >-
+  Swapcard is sold as an annual SaaS subscription, not as a metered public API
+  product. Pricing is contact-sales / quote-based and is packaged by platform
+  (an Event Engagement Platform and a Registration & Management Platform) plus
+  a volume of Event Contacts (attendees and/or exhibitors consumed during the
+  term), per-user rates, and optional add-ons. The developer APIs (Content /
+  Event Admin, Exhibitor Leads, Analytics) are included with a customer or
+  exhibitor subscription and provisioned via access tokens rather than sold on a
+  standalone per-call basis. Exact figures below are indicative from public
+  third-party listings and are NOT reconciled against a Swapcard order form.
+notes: >-
+  Swapcard publishes no self-serve public API price list. Verify current tiers,
+  Event Contact volumes, per-user rates, and implementation fees with Swapcard
+  sales at https://www.swapcard.com/pricing. Public listings also cite one-time
+  implementation costs (commonly quoted in the $25k-$150k range) that are highly
+  deal-specific.
+sources:
+- https://www.swapcard.com/pricing
+- https://www.swapcard.com/pricing-plans
+- https://swapcard.dev/
+plans:
+- id: swapcard-event-engagement
+  name: Event Engagement Platform
+  type: subscription
+  description: >-
+    Annual subscription covering the mobile and web event app, AI-powered
+    networking and matchmaking, virtual/hybrid event tooling, hosted-buyer
+    tools, and exhibitor lead management. Entry pricing is publicly cited around
+    $610 (billed annually) and scales with Event Contact volume and users.
+    Includes access to the developer APIs via tokens.
+  entries:
+  - label: Annual Subscription
+    name: event_engagement_annual
+    type: flat
+    metric: subscription
+    limit: -1
+    timeFrame: year
+    geo: global
+    unit: 1
+    price: from ~$610/year (indicative; quote-based, scales with volume)
+    userMultiplied: false
+  elements:
+  - name: Mobile and Web Event App
+  - name: AI Networking and Matchmaking
+  - name: Virtual and Hybrid Events
+  - name: Exhibitor Lead Management
+  - name: Developer API Access (Content, Leads, Analytics)
+- id: swapcard-registration-management
+  name: Registration & Management Platform
+  type: subscription
+  description: >-
+    Annual subscription covering attendee registration, exhibitor management,
+    onsite badging, and reporting. No public list price; quote-based.
+  entries:
+  - label: Annual Subscription
+    name: registration_management_annual
+    type: flat
+    metric: subscription
+    limit: -1
+    timeFrame: year
+    geo: global
+    unit: 1
+    price: contact sales (no public list price)
+    userMultiplied: false
+  elements:
+  - name: Registration
+  - name: Exhibitor Management
+  - name: Onsite Badging
+  - name: Reporting
+- id: swapcard-enterprise
+  name: Professional / Enterprise (Custom)
+  type: enterprise
+  description: >-
+    Custom-quoted plans for larger organizers and professional/enterprise
+    customers - negotiated Event Contact volumes, add-ons, security review, and
+    implementation services. Contact Swapcard sales for a demo and quote.
+  entries:
+  - label: Enterprise Agreement
+    name: enterprise
+    type: flat
+    metric: contract
+    limit: -1
+    timeFrame: year
+    geo: global
+    unit: 1
+    price: contact sales
+    userMultiplied: false
+  elements:
+  - name: Custom Event Contact Volume
+  - name: Add-ons and Upgrades
+  - name: Implementation Services
+  - name: Security and Compliance Review
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com

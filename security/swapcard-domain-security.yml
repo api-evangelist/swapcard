@@ -1,0 +1,44 @@
+generated: '2026-07-12'
+method: probed
+source: live DNS/TLS/HTTP probes of apis.yml + GraphQL endpoint hosts
+hosts:
+- host: swapcard.com
+  https: true
+  tls_version: TLSv1.3
+  cert_not_before: May 23 22:09:27 2026 GMT
+  cert_expires: Aug 21 23:09:20 2026 GMT
+  hsts: true
+  hsts_max_age: 31536000
+  note: 301-redirects to https://www.swapcard.com/
+- host: developer.swapcard.com
+  https: true
+  note: 302-redirects to the Swapcard Developer Hub (swapcard.dev). Hosts the live GraphQL endpoints under /event-admin/graphql and /exhibitor/graphql.
+- host: swapcard.dev
+  https: true
+  tls_version: TLSv1.3
+  cert_not_before: Nov 20 00:00:00 2025 GMT
+  cert_expires: Dec 19 23:59:59 2026 GMT
+  note: Developer documentation hub.
+endpoints:
+- url: https://developer.swapcard.com/event-admin/graphql
+  method: POST
+  probed: true
+  unauthenticated_response: '{"errors":[{"message":"You are not authorized","extensions":{"code":"UNAUTHORIZED"}}]}'
+  note: Live, token-gated GraphQL endpoint confirmed on 2026-07-12.
+domains:
+- domain: swapcard.com
+  dnssec: false
+  caa:
+  - '0 issue "pki.goog"'
+  - '0 issue "amazonaws.com"'
+  - '0 issue "certainly.com"'
+  - '0 issue "letsencrypt.org"'
+  - '0 issuewild "amazonaws.com"'
+  - '0 issuewild "digicert.com"'
+  - '0 issuewild "letsencrypt.org"'
+  - '0 issuewild "pki.goog"'
+  - '0 iodef "mailto:security@swapcard.com"'
+  spf: true
+  spf_record: 'v=spf1 include:_spf.google.com include:spf.mandrillapp.com include:_spf1.swapcard.com include:mail.zendesk.com include:3004554.spf03.hubspotemail.net include:app.outreach.io -all'
+  dmarc: true
+  dmarc_policy: reject

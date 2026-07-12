@@ -1,0 +1,157 @@
+{
+  "info": {
+    "name": "Swapcard GraphQL APIs",
+    "description": "Swapcard is GraphQL-first. Two separate GraphQL endpoints, each with its own access token passed in the Authorization header (no Bearer prefix in Swapcard's documented examples): the Content / Event Admin API at https://developer.swapcard.com/event-admin/graphql and the Exhibitor Leads API at https://developer.swapcard.com/exhibitor/graphql. All operations are GraphQL queries and mutations over HTTP POST. Some request bodies are representative/modeled; the Event query, myExhibitors, myLeads, and scanBadges shapes are grounded in Swapcard docs.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "contentEndpoint", "value": "https://developer.swapcard.com/event-admin/graphql", "type": "string" },
+    { "key": "leadsEndpoint", "value": "https://developer.swapcard.com/exhibitor/graphql", "type": "string" },
+    { "key": "accessToken", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Content API (Event Admin)",
+      "item": [
+        {
+          "name": "Get event by ID",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "{{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query EventById($eventId: ID!) {\n  event(id: $eventId) {\n    id\n    slug\n    title\n    beginsAt\n    endsAt\n    htmlDescription\n    isLive\n    language\n    timezone\n    totalPlannings\n    totalExhibitors\n    totalSpeakers\n    banner { imageUrl embeddedVideo { videoId } }\n    address { place street city zipCode state country }\n    groups { id name peopleCount }\n  }\n}",
+                "variables": "{\n  \"eventId\": \"\"\n}"
+              }
+            },
+            "url": { "raw": "{{contentEndpoint}}", "host": ["{{contentEndpoint}}"] },
+            "description": "Fetch a single event by ID. Grounded in Swapcard's documented EventById example."
+          }
+        },
+        {
+          "name": "Get multiple events",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "{{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query events($eventIds: [String!]) {\n  events(ids: $eventIds) {\n    id\n    title\n    beginsAt\n    endsAt\n    isLive\n  }\n}",
+                "variables": "{\n  \"eventIds\": []\n}"
+              }
+            },
+            "url": { "raw": "{{contentEndpoint}}", "host": ["{{contentEndpoint}}"] },
+            "description": "Fetch multiple events by ID. Grounded in Swapcard's documented events example."
+          }
+        },
+        {
+          "name": "List people for an event (modeled)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "{{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query People($eventId: ID!, $first: Int) {\n  people(eventId: $eventId, first: $first) {\n    id\n    firstName\n    lastName\n    email\n    jobTitle\n    organization\n    type\n  }\n}",
+                "variables": "{\n  \"eventId\": \"\",\n  \"first\": 25\n}"
+              }
+            },
+            "url": { "raw": "{{contentEndpoint}}", "host": ["{{contentEndpoint}}"] },
+            "description": "Representative query for event people. Field/argument shape is modeled - verify against the Explorer/Reference."
+          }
+        },
+        {
+          "name": "Create event (modeled)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "{{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation CreateEvent($input: EventInput!) {\n  createEvent(input: $input) {\n    id\n    title\n    slug\n  }\n}",
+                "variables": "{\n  \"input\": {\n    \"title\": \"My Event\",\n    \"format\": \"HYBRID\"\n  }\n}"
+              }
+            },
+            "url": { "raw": "{{contentEndpoint}}", "host": ["{{contentEndpoint}}"] },
+            "description": "Representative create-event mutation. Mutation name/input are modeled - verify against the Reference."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Exhibitor Leads API",
+      "item": [
+        {
+          "name": "My exhibitors (booths)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "{{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query MyExhibitors {\n  myExhibitors {\n    id\n    name\n    events { id title }\n  }\n}",
+                "variables": "{}"
+              }
+            },
+            "url": { "raw": "{{leadsEndpoint}}", "host": ["{{leadsEndpoint}}"] },
+            "description": "List booths the exhibitor token can access. Grounded in Swapcard Leads docs."
+          }
+        },
+        {
+          "name": "My leads (export)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "{{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query MyLeads($eventId: ID!, $exhibitorId: ID!, $first: Int, $after: String) {\n  myLeads(eventId: $eventId, exhibitorId: $exhibitorId, first: $first, after: $after) {\n    pageInfo { hasNextPage endCursor }\n    nodes {\n      id\n      connectedAt\n      isScanned\n      rating\n      note\n      target {\n        ... on Contact { id firstName lastName email organization }\n        ... on EventPerson { id firstName lastName email organization }\n      }\n    }\n  }\n}",
+                "variables": "{\n  \"eventId\": \"\",\n  \"exhibitorId\": \"\",\n  \"first\": 50\n}"
+              }
+            },
+            "url": { "raw": "{{leadsEndpoint}}", "host": ["{{leadsEndpoint}}"] },
+            "description": "Export leads with cursor pagination. Grounded in Swapcard Leads docs (pageInfo, nodes, rating, note, target)."
+          }
+        },
+        {
+          "name": "Scan badges",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "{{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation ScanBadges($eventId: ID!, $exhibitorId: ID!, $badges: [BadgeScanInput!]!) {\n  scanBadges(eventId: $eventId, exhibitorId: $exhibitorId, badges: $badges) {\n    id\n    rating\n    note\n    target {\n      ... on Contact { id firstName lastName }\n      ... on EventPerson { id firstName lastName }\n    }\n  }\n}",
+                "variables": "{\n  \"eventId\": \"\",\n  \"exhibitorId\": \"\",\n  \"badges\": [\n    { \"badgeId\": \"\", \"rating\": \"WARM\", \"note\": \"\" }\n  ]\n}"
+              }
+            },
+            "url": { "raw": "{{leadsEndpoint}}", "host": ["{{leadsEndpoint}}"] },
+            "description": "Scan badges to create leads. Grounded in Swapcard Leads docs (scanBadges returns connection { id, rating, note, target })."
+          }
+        }
+      ]
+    }
+  ]
+}

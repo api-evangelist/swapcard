@@ -1,0 +1,98 @@
+specification: FinOps Framework
+specificationVersion: '1.0'
+schema: https://www.finops.org/framework/
+provider: Swapcard
+providerId: swapcard
+created: '2026-07-12'
+modified: '2026-07-12'
+reconciled: false
+tags:
+- Events
+- Event Platform
+- SaaS
+- FinOps
+- Cost Management
+- FOCUS
+description: >-
+  FinOps view of Swapcard spend. Swapcard is an annual SaaS subscription, not a
+  usage-metered public API. Cost is driven by the platform package (Event
+  Engagement and/or Registration & Management), the volume of Event Contacts
+  (attendees and/or exhibitors) consumed during the term, the number of licensed
+  users, optional add-ons/upgrades, and one-time implementation/onboarding fees.
+  The developer APIs (Content, Leads, Analytics) carry no separate per-call
+  charge - they are included with the subscription and gated by access tokens.
+  There is no invoice for the API itself.
+notes: >-
+  Per-unit rates and Event Contact allowances are quote-based and not reconciled
+  here; verify with Swapcard sales (https://www.swapcard.com/pricing). Model
+  spend as an annual commitment plus potential in-term volume top-ups and
+  implementation services rather than as consumption-based API billing.
+sources:
+- https://www.swapcard.com/pricing
+- https://www.swapcard.com/blog/event-platform-pricing-hidden-costs
+- https://swapcard.dev/
+- https://focus.finops.org/focus-specification/v1-3/
+alignedWith:
+  framework: FinOps Foundation Framework
+  frameworkUrl: https://www.finops.org/framework/
+  dataSpec: FOCUS
+  dataSpecVersion: '1.3'
+  dataSpecUrl: https://focus.finops.org/focus-specification/v1-3/
+publisherName: Swapcard
+serviceCategory: Events and Community Engagement
+billingModel:
+  pricingCategory: Subscription
+  billingFrequency: Annual
+  billingCurrency: USD
+  chargeCategories:
+  - Purchase
+  - Usage
+  - Adjustment
+focusColumns:
+  ServiceName: Swapcard Event Platform
+  ServiceCategory: Events and Community Engagement
+  ProviderName: Swapcard
+  PublisherName: Swapcard
+  InvoiceIssuerName: Swapcard
+  BillingCurrency: USD
+  ChargeCategory: Purchase
+  PricingCategory: Subscription
+meters:
+- name: annual_subscription
+  description: Annual platform subscription (Event Engagement and/or Registration & Management).
+  unit: subscription
+  aggregation: sum
+  dimensions:
+  - account
+  - platform
+- name: event_contacts
+  description: Event Contacts (attendees and/or exhibitors) included and consumed during the subscription term; in-term top-ups possible.
+  unit: contacts
+  aggregation: sum
+  dimensions:
+  - account
+  - event
+- name: licensed_users
+  description: Per-user licensing for organizer/staff seats.
+  unit: users
+  aggregation: sum
+  dimensions:
+  - account
+- name: implementation_services
+  description: One-time onboarding/implementation and professional services fees.
+  unit: engagement
+  aggregation: sum
+  dimensions:
+  - account
+principles:
+- name: Visibility
+  description: Track annual commitment, Event Contact consumption per event, and licensed-user counts against the contract; the API itself adds no separate line item.
+- name: Allocation
+  description: Map Event Contact usage and add-ons to specific events, teams, or clients so platform spend is attributable.
+- name: Optimization
+  description: Right-size Event Contact volume to actual attendance/exhibitors, consolidate events onto one subscription, and avoid mid-term volume overages by forecasting demand.
+- name: Accountability
+  description: Assign an owner for the Swapcard contract; review Event Contact burn-down and renewal terms before each event cycle.
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com

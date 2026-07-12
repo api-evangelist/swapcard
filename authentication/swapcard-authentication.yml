@@ -1,0 +1,29 @@
+generated: '2026-07-12'
+method: documented
+source: https://swapcard.dev/exhibitors/authentication
+summary:
+  types:
+  - apiKey
+schemes:
+- name: accessToken
+  type: apiKey
+  in: header
+  headerName: Authorization
+  description: 'All Swapcard GraphQL queries require a valid access token passed in
+    the Authorization header. Swapcard''s documented examples send the raw token
+    value with no Bearer prefix (Authorization: ACCESS_TOKEN). Leads API tokens are
+    created in the Exhibitor Center under Leads then API keys; Content (Event Admin)
+    API access is provisioned to organizers. Tokens are secret - treat them like a
+    password and never expose them in client-side code.'
+  sources:
+  - https://swapcard.dev/exhibitors/authentication
+  - https://swapcard.dev/leads-api/usage
+notes: >-
+  Confirmed via live probe on 2026-07-12: an unauthenticated POST to
+  https://developer.swapcard.com/event-admin/graphql returns
+  {"errors":[{"message":"You are not authorized","extensions":{"code":"UNAUTHORIZED"}}]},
+  confirming token-gated access. The Content API and the Exhibitor Leads API use
+  separate endpoints and separate tokens.
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com

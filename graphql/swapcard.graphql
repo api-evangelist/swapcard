@@ -1,0 +1,311 @@
+"""
+Swapcard GraphQL Schema (representative SDL)
+
+Swapcard's developer platform is GraphQL-first. There is no documented REST
+surface; all operations are GraphQL over HTTP POST. Swapcard actually exposes
+TWO distinct GraphQL endpoints, each with its own schema and its own access
+token:
+
+  1. Content API / Event Admin  -> POST https://developer.swapcard.com/event-admin/graphql
+     (organizer-side: fetch, create, modify, and delete event content -
+      events, people, exhibitors, plannings/sessions, groups)
+
+  2. Exhibitor Leads API        -> POST https://developer.swapcard.com/exhibitor/graphql
+     (exhibitor-side: retrieve booths, export leads, scan badges)
+
+  A GraphQL Analytics API also exists (POST .../analytics/graphql, per docs)
+  but its schema is not modeled here.
+
+For catalog convenience this file merges the two surfaces into a single SDL
+document with one Query and one Mutation root. In production they are SEPARATE
+endpoints with separate schemas and separate tokens - do not assume a single
+endpoint serves every field below.
+
+Grounding / honesty notes:
+  - CONFIRMED from Swapcard docs (swapcard.dev) and a live endpoint probe on
+    2026-07-12: the two endpoints, token-in-Authorization-header auth, the
+    Event query shape (event(id:), events(ids:)) and its scalar fields, the
+    Leads myExhibitors / myLeads / scanBadges operations, and cursor
+    pagination (pageInfo.hasNextPage, pageInfo.endCursor, nodes, first/after).
+  - MODELED (representative, not verbatim from the published schema): most
+    mutation names and their inputs, several nested field selections, enum
+    members, and the Person/Exhibitor/Planning detail fields. Swapcard's real
+    schema is large and introspection is gated behind a token; treat the
+    modeled portions as a faithful sketch, not a byte-for-byte contract.
+  - NO GraphQL subscriptions and NO WebSocket (wss://) transport are documented
+    on either endpoint. Real-time delivery is handled by Webhooks, not
+    subscriptions. There is therefore no Subscription root type in this schema.
+"""
+
+# =============================================================================
+# Scalars
+# =============================================================================
+
+scalar DateTime
+scalar ID
+scalar JSON
+
+# =============================================================================
+# Enums (members partly MODELED)
+# =============================================================================
+
+enum PersonType {
+  ATTENDEE
+  SPEAKER
+  EXHIBITOR
+  ORGANIZER
+}
+
+"Lead qualification rating captured when scanning a badge or connecting."
+enum LeadRating {
+  HOT
+  WARM
+  COLD
+  UNRATED
+}
+
+enum EventFormat {
+  IN_PERSON
+  VIRTUAL
+  HYBRID
+}
+
+# =============================================================================
+# Content API / Event Admin types
+# (Event scalar fields are CONFIRMED from the documented example query)
+# =============================================================================
+
+"""
+An event on the Swapcard platform. Field set below reflects the documented
+`EventById` / `events` example queries.
+"""
+type Event {
+  id: ID!
+  slug: String
+  title: String!
+  beginsAt: DateTime
+  endsAt: DateTime
+  createdAt: DateTime
+  updatedAt: DateTime
+  htmlDescription: String
+  isLive: Boolean
+  language: String
+  timezone: String
+  banner: EventBanner
+  address: Address
+  totalPlannings: Int
+  totalExhibitors: Int
+  totalSpeakers: Int
+  format: EventFormat
+  groups: [Group!]
+}
+
+type EventBanner {
+  imageUrl: String
+  embeddedVideo: YoutubeEmbeddedVideo
+}
+
+type YoutubeEmbeddedVideo {
+  videoId: String
+}
+
+"Physical location of an event (nested fields CONFIRMED from docs)."
+type Address {
+  place: String
+  street: String
+  city: String
+  zipCode: String
+  state: String
+  country: String
+}
+
+"A group / community segment within an event."
+type Group {
+  id: ID!
+  name: String!
+  peopleCount: Int
+}
+
+"""
+A person registered to an event (attendee, speaker, exhibitor rep, organizer).
+Detail fields below are MODELED as a representative selection.
+"""
+type Person {
+  id: ID!
+  firstName: String
+  lastName: String
+  email: String
+  jobTitle: String
+  organization: String
+  biography: String
+  photoUrl: String
+  type: PersonType
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+"An exhibitor / booth within an event."
+type Exhibitor {
+  id: ID!
+  name: String!
+  description: String
+  websiteUrl: String
+  logoUrl: String
+  booth: String
+  events: [Event!]
+  members: [Person!]
+}
+
+"A planning / agenda session (talk, workshop, roundtable)."
+type Planning {
+  id: ID!
+  title: String!
+  description: String
+  beginsAt: DateTime
+  endsAt: DateTime
+  room: String
+  speakers: [Person!]
+}
+
+# =============================================================================
+# Exhibitor Leads API types
+# (myExhibitors / myLeads / scanBadges shapes CONFIRMED from docs)
+# =============================================================================
+
+"A captured lead / connection for an exhibitor at an event."
+type Connection {
+  id: ID!
+  connectedAt: DateTime
+  isScanned: Boolean
+  rating: LeadRating
+  note: String
+  target: LeadTarget
+}
+
+"The person behind a lead - either an imported Contact or an EventPerson."
+union LeadTarget = Contact | EventPerson
+
+type Contact {
+  id: ID!
+  firstName: String
+  lastName: String
+  email: String
+  organization: String
+  jobTitle: String
+}
+
+type EventPerson {
+  id: ID!
+  firstName: String
+  lastName: String
+  email: String
+  organization: String
+  jobTitle: String
+}
+
+# ---- Cursor pagination (Relay-style; CONFIRMED shape) ----
+
+type PageInfo {
+  hasNextPage: Boolean!
+  endCursor: String
+}
+
+type ConnectionList {
+  nodes: [Connection!]!
+  pageInfo: PageInfo!
+}
+
+# =============================================================================
+# Inputs (MODELED representative inputs)
+# =============================================================================
+
+input EventInput {
+  title: String!
+  slug: String
+  beginsAt: DateTime
+  endsAt: DateTime
+  htmlDescription: String
+  timezone: String
+  format: EventFormat
+}
+
+input PersonInput {
+  firstName: String
+  lastName: String
+  email: String!
+  jobTitle: String
+  organization: String
+  type: PersonType
+}
+
+input BadgeScanInput {
+  "Raw badge payload scanned from a QR / NFC badge."
+  badgeId: String!
+  rating: LeadRating
+  note: String
+}
+
+# =============================================================================
+# Query root (Content API + Leads API, merged for catalog convenience)
+# =============================================================================
+
+type Query {
+  # --- Content API / Event Admin (endpoint: /event-admin/graphql) ---
+
+  "Fetch a single event by ID. CONFIRMED: event(id: ID!)."
+  event(id: ID!): Event
+
+  "Fetch multiple events by ID. CONFIRMED: events(ids: [String!])."
+  events(ids: [String!]): [Event!]
+
+  "List people for an event. MODELED selection / arguments."
+  people(eventId: ID!, first: Int, after: String): [Person!]
+
+  "Fetch a single person by ID within an event. MODELED."
+  person(eventId: ID!, id: ID!): Person
+
+  "List exhibitors for an event. MODELED."
+  exhibitors(eventId: ID!, first: Int, after: String): [Exhibitor!]
+
+  "List plannings / agenda sessions for an event. MODELED."
+  plannings(eventId: ID!, first: Int, after: String): [Planning!]
+
+  # --- Exhibitor Leads API (endpoint: /exhibitor/graphql) ---
+
+  "Booths the authenticated exhibitor token can access. CONFIRMED: myExhibitors."
+  myExhibitors: [Exhibitor!]
+
+  "Export leads for a booth at an event. CONFIRMED: myLeads(eventId, exhibitorId) with cursor pagination."
+  myLeads(eventId: ID!, exhibitorId: ID!, first: Int, after: String): ConnectionList
+}
+
+# =============================================================================
+# Mutation root
+# =============================================================================
+
+type Mutation {
+  # --- Content API / Event Admin (MODELED mutation names/inputs) ---
+
+  "Create an event. MODELED."
+  createEvent(input: EventInput!): Event
+
+  "Update an event. MODELED."
+  updateEvent(id: ID!, input: EventInput!): Event
+
+  "Delete an event. MODELED."
+  deleteEvent(id: ID!): Boolean
+
+  "Add a person to an event. MODELED."
+  createPerson(eventId: ID!, input: PersonInput!): Person
+
+  "Update a person. MODELED."
+  updatePerson(eventId: ID!, id: ID!, input: PersonInput!): Person
+
+  "Remove a person from an event. MODELED."
+  deletePerson(eventId: ID!, id: ID!): Boolean
+
+  # --- Exhibitor Leads API ---
+
+  "Scan one or more badges to create leads for a booth. CONFIRMED: scanBadges returns connection { id, rating, note, target }."
+  scanBadges(eventId: ID!, exhibitorId: ID!, badges: [BadgeScanInput!]!): [Connection!]
+}

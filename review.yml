@@ -1,0 +1,113 @@
+aid: swapcard
+name: Swapcard
+review:
+  question: Does Swapcard expose a documented public WebSocket API?
+  answer: false
+  date: '2026-07-12'
+  reviewer: API Evangelist
+  asyncapiSpecCreated: false
+  asyncapiScopeNote: |
+    No AsyncAPI document was authored. Swapcard's developer platform is
+    GraphQL-first and exposes no server-push transport on its own API - there
+    are no documented GraphQL subscriptions and no WebSocket (wss://) endpoint
+    on either the Content (Event Admin) API or the Exhibitor Leads API. All
+    operations are GraphQL queries and mutations over HTTP POST. Real-time
+    delivery is offered separately via Webhooks (Swapcard POSTs event
+    notifications - registration, check-in, profile updates - to a
+    customer-configured HTTP endpoint), which is server-to-endpoint HTTP, not a
+    WebSocket and not a subscription surface to model.
+findings:
+  summary: |
+    Swapcard does not publish a documented public WebSocket API, and it does
+    not expose GraphQL subscriptions. Swapcard is an AI-powered event and
+    community engagement platform. Its developer platform is GraphQL-first and
+    is documented at swapcard.dev (developer.swapcard.com 302-redirects there).
+    Two customer/partner-provisioned GraphQL endpoints are documented, each a
+    separate schema with its own token: the Content / Event Admin API at
+    https://developer.swapcard.com/event-admin/graphql (organizer-side: fetch,
+    create, modify, delete events, people, exhibitors, plannings, groups) and
+    the Exhibitor Leads API at https://developer.swapcard.com/exhibitor/graphql
+    (exhibitor-side: myExhibitors, myLeads, scanBadges). A GraphQL Analytics API
+    is also referenced. Every documented operation is a GraphQL query or
+    mutation over HTTP POST. The published Limitations pages describe HTTP
+    GraphQL only, with a cost-based rate limit, and make no mention of
+    subscriptions or WebSocket. Real-time is handled by Webhooks, not sockets.
+  transportHonesty: |
+    Transport is GraphQL over HTTPS POST, NOT REST. No REST resource paths are
+    documented, so no OpenAPI document was authored - a GraphQL SDL schema
+    (graphql/swapcard.graphql) is the primary interface artifact instead. No
+    wss:// or ws:// endpoint and no GraphQL Subscription root are documented on
+    any Swapcard API as of the review date.
+  confirmed:
+    - 'Two GraphQL endpoints: /event-admin/graphql (Content) and /exhibitor/graphql (Leads).'
+    - Live probe 2026-07-12 of POST https://developer.swapcard.com/event-admin/graphql returned {"errors":[{"message":"You are not authorized","extensions":{"code":"UNAUTHORIZED"}}]}, confirming a live, token-gated GraphQL endpoint.
+    - Auth via an access token passed in the Authorization header (no Bearer prefix in Swapcard's documented examples); Leads tokens created in the Exhibitor Center under Leads > API keys.
+    - 'Content API Event query shape event(id: ID!) and events(ids: [String!]) plus its documented scalar fields (id, slug, title, beginsAt, endsAt, htmlDescription, banner, address, isLive, language, timezone, totalPlannings, totalExhibitors, totalSpeakers, groups).'
+    - Leads API operations myExhibitors, myLeads(eventId, exhibitorId), and scanBadges mutation returning connection { id, rating, note, target }, with Relay-style cursor pagination (pageInfo.hasNextPage, pageInfo.endCursor, nodes, first/after).
+    - Cost-based rate limiting (60,000 points/min; 10,000 points/query max) documented on the Limitations page.
+  modeled:
+    - Most mutation names and inputs on the Content API (createEvent, updateEvent, deleteEvent, createPerson, etc.) are representative, not verbatim from the gated schema.
+    - Person, Exhibitor, and Planning detail fields, several enum members, and nested selections are a faithful sketch, not a byte-for-byte copy of Swapcard's published schema.
+    - The merged single-schema SDL is a catalog convenience; in production the Content and Leads surfaces are separate endpoints/schemas/tokens.
+  transports:
+    - protocol: GraphQL
+      scheme: https
+      baseURL: https://developer.swapcard.com/event-admin/graphql
+      documented: true
+      note: Content / Event Admin API. GraphQL queries and mutations over HTTP POST. Token in Authorization header.
+    - protocol: GraphQL
+      scheme: https
+      baseURL: https://developer.swapcard.com/exhibitor/graphql
+      documented: true
+      note: Exhibitor Leads API. Separate schema and token from the Content API.
+    - protocol: Webhook
+      scheme: https
+      documented: true
+      note: Swapcard POSTs real-time notifications (registration, check-in, profile updates) to a customer-configured HTTP endpoint. Server-to-endpoint HTTP, not WebSocket.
+    - protocol: WebSocket
+      scheme: wss
+      documented: false
+      note: No WebSocket endpoint and no GraphQL subscriptions are documented on any Swapcard API as of the review date.
+  restSurface: none
+  openApiCreated: false
+  openApiScopeNote: |
+    No OpenAPI document was authored because Swapcard exposes no documented REST
+    surface - the entire developer platform is GraphQL over HTTP POST. The
+    GraphQL SDL at graphql/swapcard.graphql is the primary interface artifact.
+sources:
+  - url: https://swapcard.dev/
+    type: Documentation
+    note: Developer Hub landing; lists Content API, Analytics API, Leads API, Webhooks, React SDK - all GraphQL.
+  - url: https://swapcard.dev/content-api/about-the-graphql-api
+    type: Documentation
+    note: Content API endpoint https://developer.swapcard.com/event-admin/graphql; GraphQL fetch/create/modify/delete.
+  - url: https://swapcard.dev/content-api/examples/event
+    type: Documentation
+    note: Documented Event query shape and field set (event(id:), events(ids:)).
+  - url: https://swapcard.dev/content-api/limitations
+    type: Documentation
+    note: Cost-based rate limits; HTTP GraphQL only; no subscriptions or WebSocket mentioned.
+  - url: https://swapcard.dev/exhibitors/authentication
+    type: Documentation
+    note: Authorization-header token auth; Leads endpoint https://developer.swapcard.com/exhibitor/graphql.
+  - url: https://swapcard.dev/leads-api/usage
+    type: Documentation
+    note: myExhibitors, myLeads, scanBadges; cursor pagination (pageInfo, nodes, first/after).
+  - url: https://www.swapcard.com/pricing
+    type: Pricing
+    note: Annual subscription SaaS; Event Engagement Platform entry tier; custom/enterprise via sales.
+  - url: https://developer.swapcard.com/event-admin/graphql
+    type: LiveProbe
+    note: POST with {__typename} returned UNAUTHORIZED - confirms live, token-gated GraphQL endpoint (2026-07-12).
+actions:
+  asyncapiPath: null
+  openapiPath: null
+  graphqlPath: graphql/swapcard.graphql
+  apisYmlUpdated: true
+  reason: |
+    No WebSocket surface and no GraphQL subscriptions exist, so no AsyncAPI
+    document was created. No REST surface exists, so no OpenAPI document was
+    created. Swapcard is GraphQL-first, so a representative GraphQL SDL schema
+    was authored as the primary interface artifact, with confirmed portions
+    (endpoints, auth, Event query, Leads operations, pagination) grounded in the
+    docs and a live endpoint probe, and modeled portions flagged honestly.

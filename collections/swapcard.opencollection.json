@@ -1,0 +1,138 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Swapcard GraphQL APIs",
+    "version": "1.0"
+  },
+  "request": {
+    "auth": {
+      "type": "apikey",
+      "apikey": {
+        "key": "Authorization",
+        "value": "{{accessToken}}",
+        "in": "header"
+      }
+    }
+  },
+  "items": [
+    {
+      "info": { "name": "Content API (Event Admin)", "type": "folder" },
+      "items": [
+        {
+          "info": { "name": "Get event by ID", "type": "http" },
+          "http": {
+            "method": "POST",
+            "url": "https://developer.swapcard.com/event-admin/graphql",
+            "headers": [
+              { "name": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "type": "graphql",
+              "graphql": {
+                "query": "query EventById($eventId: ID!) { event(id: $eventId) { id slug title beginsAt endsAt htmlDescription isLive language timezone totalPlannings totalExhibitors totalSpeakers banner { imageUrl embeddedVideo { videoId } } address { place street city zipCode state country } groups { id name peopleCount } } }",
+                "variables": "{ \"eventId\": \"\" }"
+              }
+            }
+          },
+          "docs": "Fetch a single event by ID. Grounded in Swapcard's documented EventById example."
+        },
+        {
+          "info": { "name": "Get multiple events", "type": "http" },
+          "http": {
+            "method": "POST",
+            "url": "https://developer.swapcard.com/event-admin/graphql",
+            "headers": [
+              { "name": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "type": "graphql",
+              "graphql": {
+                "query": "query events($eventIds: [String!]) { events(ids: $eventIds) { id title beginsAt endsAt isLive } }",
+                "variables": "{ \"eventIds\": [] }"
+              }
+            }
+          },
+          "docs": "Fetch multiple events by ID. Grounded in Swapcard's documented events example."
+        },
+        {
+          "info": { "name": "Create event (modeled)", "type": "http" },
+          "http": {
+            "method": "POST",
+            "url": "https://developer.swapcard.com/event-admin/graphql",
+            "headers": [
+              { "name": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "type": "graphql",
+              "graphql": {
+                "query": "mutation CreateEvent($input: EventInput!) { createEvent(input: $input) { id title slug } }",
+                "variables": "{ \"input\": { \"title\": \"My Event\", \"format\": \"HYBRID\" } }"
+              }
+            }
+          },
+          "docs": "Representative create-event mutation. Mutation name/input are modeled - verify against the Reference."
+        }
+      ]
+    },
+    {
+      "info": { "name": "Exhibitor Leads API", "type": "folder" },
+      "items": [
+        {
+          "info": { "name": "My exhibitors (booths)", "type": "http" },
+          "http": {
+            "method": "POST",
+            "url": "https://developer.swapcard.com/exhibitor/graphql",
+            "headers": [
+              { "name": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "type": "graphql",
+              "graphql": {
+                "query": "query MyExhibitors { myExhibitors { id name events { id title } } }",
+                "variables": "{}"
+              }
+            }
+          },
+          "docs": "List booths the exhibitor token can access. Grounded in Swapcard Leads docs."
+        },
+        {
+          "info": { "name": "My leads (export)", "type": "http" },
+          "http": {
+            "method": "POST",
+            "url": "https://developer.swapcard.com/exhibitor/graphql",
+            "headers": [
+              { "name": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "type": "graphql",
+              "graphql": {
+                "query": "query MyLeads($eventId: ID!, $exhibitorId: ID!, $first: Int, $after: String) { myLeads(eventId: $eventId, exhibitorId: $exhibitorId, first: $first, after: $after) { pageInfo { hasNextPage endCursor } nodes { id connectedAt isScanned rating note target { ... on Contact { id firstName lastName email organization } ... on EventPerson { id firstName lastName email organization } } } } }",
+                "variables": "{ \"eventId\": \"\", \"exhibitorId\": \"\", \"first\": 50 }"
+              }
+            }
+          },
+          "docs": "Export leads with cursor pagination. Grounded in Swapcard Leads docs (pageInfo, nodes, rating, note, target)."
+        },
+        {
+          "info": { "name": "Scan badges", "type": "http" },
+          "http": {
+            "method": "POST",
+            "url": "https://developer.swapcard.com/exhibitor/graphql",
+            "headers": [
+              { "name": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "type": "graphql",
+              "graphql": {
+                "query": "mutation ScanBadges($eventId: ID!, $exhibitorId: ID!, $badges: [BadgeScanInput!]!) { scanBadges(eventId: $eventId, exhibitorId: $exhibitorId, badges: $badges) { id rating note target { ... on Contact { id firstName lastName } ... on EventPerson { id firstName lastName } } } }",
+                "variables": "{ \"eventId\": \"\", \"exhibitorId\": \"\", \"badges\": [ { \"badgeId\": \"\", \"rating\": \"WARM\", \"note\": \"\" } ] }"
+              }
+            }
+          },
+          "docs": "Scan badges to create leads. Grounded in Swapcard Leads docs (scanBadges returns connection { id, rating, note, target })."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

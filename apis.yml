@@ -1,0 +1,116 @@
+aid: swapcard
+url: https://raw.githubusercontent.com/api-evangelist/swapcard/refs/heads/main/apis.yml
+name: Swapcard
+kind: company
+description: Swapcard is an AI-powered event and community engagement platform for
+  in-person, virtual, and hybrid events - mobile and web event apps, attendee
+  networking and matchmaking, exhibitor and lead management, registration, and
+  onsite badging. For developers Swapcard is GraphQL-first - an organizer-facing
+  Content (Event Admin) API to fetch, create, modify, and delete event content
+  (events, people, exhibitors, plannings/sessions, groups); an Exhibitor Leads
+  API to retrieve booths, export leads, and scan badges; and a GraphQL Analytics
+  API. Access is token-based and provisioned to Swapcard customers and partners
+  (organizers and exhibitors).
+image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+tags:
+- Events
+- Event Management
+- Community
+- Networking
+- Event Platform
+- GraphQL
+- Attendees
+- Exhibitors
+- SaaS
+created: '2026-07-12'
+modified: '2026-07-12'
+specificationVersion: '0.19'
+apis:
+- aid: swapcard:swapcard-content-api
+  name: Swapcard Content API
+  tags:
+  - Events
+  - Event Management
+  - GraphQL
+  - Content
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+  humanURL: https://swapcard.dev/content-api/about-the-graphql-api
+  baseURL: https://developer.swapcard.com/event-admin/graphql
+  properties:
+  - url: https://swapcard.dev/content-api/about-the-graphql-api
+    type: Documentation
+  - url: https://swapcard.dev/content-api/reference/graphql-event-api-schema
+    type: APIReference
+  - url: graphql/swapcard.graphql
+    type: GraphQL
+  - url: collections/swapcard.postman_collection.json
+    type: PostmanCollection
+  - url: collections/swapcard.opencollection.json
+    type: OpenCollection
+  description: Organizer-facing GraphQL API (the Event Admin endpoint) to fetch,
+    create, modify, and delete event content - events, people, exhibitors,
+    plannings/sessions, and groups. Single GraphQL endpoint over HTTP POST,
+    authenticated with an organizer access token in the Authorization header.
+- aid: swapcard:swapcard-leads-api
+  name: Swapcard Exhibitor Leads API
+  tags:
+  - Leads
+  - Exhibitors
+  - GraphQL
+  - Networking
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+  humanURL: https://swapcard.dev/leads-api/about-the-graphql-api
+  baseURL: https://developer.swapcard.com/exhibitor/graphql
+  properties:
+  - url: https://swapcard.dev/leads-api/about-the-graphql-api
+    type: Documentation
+  - url: https://swapcard.dev/leads-api/usage
+    type: APIReference
+  - url: graphql/swapcard.graphql
+    type: GraphQL
+  - url: collections/swapcard.postman_collection.json
+    type: PostmanCollection
+  - url: collections/swapcard.opencollection.json
+    type: OpenCollection
+  description: Exhibitor-facing GraphQL API to list accessible booths (myExhibitors),
+    export event leads with cursor pagination (myLeads), and scan badges to create
+    leads (scanBadges). Separate GraphQL endpoint and token from the Content API,
+    created in the Exhibitor Center under Leads then API keys.
+- aid: swapcard:swapcard-analytics-api
+  name: Swapcard Analytics API
+  tags:
+  - Analytics
+  - Events
+  - GraphQL
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+  humanURL: https://swapcard.dev/analytics-api/about-the-graphql-api
+  baseURL: https://developer.swapcard.com/event-admin/graphql
+  properties:
+  - url: https://swapcard.dev/analytics-api/about-the-graphql-api
+    type: Documentation
+  description: GraphQL API to collect and leverage analytics on event performance
+    and attendee behavior. Documented on the Swapcard Developer Hub; its schema is
+    not modeled in this catalog entry (baseURL shown is indicative, verify the
+    analytics endpoint in Swapcard docs).
+common:
+- type: DomainSecurity
+  url: security/swapcard-domain-security.yml
+- type: Authentication
+  url: authentication/swapcard-authentication.yml
+- type: Website
+  url: https://www.swapcard.com/
+- type: Documentation
+  url: https://swapcard.dev/
+- type: LinkedIn
+  url: https://www.linkedin.com/company/swapcard
+- type: Plans
+  url: plans/swapcard-plans-pricing.yml
+- type: RateLimits
+  url: rate-limits/swapcard-rate-limits.yml
+- type: FinOps
+  url: finops/swapcard-finops.yml
+- url: https://www.swapcard.com/blog
+  type: Blog
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com
