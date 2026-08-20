@@ -26,6 +26,16 @@ accessModel:
   method: derived
 image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/icons/swapcard.png
 tags:
+- Event
+- Event Management
+- Community
+- Networking
+- Event Platform
+- GraphQL
+- Attendees
+- Exhibitors
+- Software-as-a-Service
+tags_raw:
 - Events
 - Event Management
 - Community
@@ -42,6 +52,11 @@ apis:
 - aid: swapcard:swapcard-content-api
   name: Swapcard Content API
   tags:
+  - Event
+  - Event Management
+  - GraphQL
+  - Content
+  tags_raw:
   - Events
   - Event Management
   - GraphQL
@@ -92,6 +107,10 @@ apis:
 - aid: swapcard:swapcard-analytics-api
   name: Swapcard Analytics API
   tags:
+  - Analytics
+  - Event
+  - GraphQL
+  tags_raw:
   - Analytics
   - Events
   - GraphQL
