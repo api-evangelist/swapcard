@@ -11,6 +11,17 @@ description: Swapcard is an AI-powered event and community engagement platform f
   API to retrieve booths, export leads, and scan badges; and a GraphQL Analytics
   API. Access is token-based and provisioned to Swapcard customers and partners
   (organizers and exhibitors).
+deliveryModel:
+  model: saas
+  open_source: false
+  commercial: true
+  callable_host: false
+  label: Hosted service · you call their endpoint
+  confidence: medium
+  source:
+  - pricing
+  generated: '2026-08-28'
+  method: derived
 accessModel:
   pricing: paid
   onboarding: self-serve
