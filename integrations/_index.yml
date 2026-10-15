@@ -28,7 +28,7 @@
     builder: unknown (not in the directory record)
     other_apps:
     - swapcard-exhibitor
-  status: pending-partner-spec
+  status: not-a-workflow
   arazzo: null
 - slug: swapcard-pipedream
   label: Pipedream
@@ -54,5 +54,5 @@
     actions: true
     sources: true
     builder: Pipedream repo (component)
-  status: pending-partner-spec
+  status: not-a-workflow
   arazzo: null
